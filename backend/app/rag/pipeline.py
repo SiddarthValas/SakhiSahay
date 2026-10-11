@@ -11,7 +11,7 @@ from app.rag.language import LANGUAGE_LABELS, Language, LanguageChoice, resolve_
 from app.rag.llm.base import LLMUnavailable
 from app.rag.llm.factory import get_llm
 from app.rag.prompt_builder import build_prompt
-from app.rag.retriever import RetrievalResult, retrieve
+from app.rag.retriever import RetrievalResult, evidence_strength, retrieve
 from app.rag.safety import EDUCATIONAL_DISCLAIMER, SafetyAssessment, screen_question
 from app.rag.vector_store import ScoredChunk, get_vector_store
 from app.schemas.chat import ChatResponse, SafetyNoticeOut, SafetyOut, SourceRef
@@ -133,13 +133,15 @@ def answer_question(
     if not status.get("index_ready"):
         raise KnowledgeIndexUnavailable("Knowledge index is empty. Run `python -m app.knowledge.ingest` first.")
 
-    result: RetrievalResult = retrieve(question)
+    # Gate on the detected language: cross-lingual similarity is systematically lower.
+    result: RetrievalResult = retrieve(question, language=detected)
     latency = lambda: int((time.perf_counter() - started) * 1000)  # noqa: E731
     common = {
         "language_detected": detected,
         "language_used": language,
         "safety": _safety_out(safety),
         "best_score": round(result.best_score, 3) if result.best_score is not None else None,
+        "evidence_strength": evidence_strength(result.best_score, result.min_score),
         "disclaimer": EDUCATIONAL_DISCLAIMER,
         "tracker_context_used": bool(tracker_context),
     }

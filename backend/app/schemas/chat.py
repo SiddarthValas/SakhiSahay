@@ -56,6 +56,7 @@ class ChatResponse(BaseModel):
     model: str | None
     retrieved_count: int
     best_score: float | None
+    evidence_strength: Literal["none", "weak", "moderate", "strong"]
     latency_ms: int
     fallback_reason: str | None = None
     tracker_context_used: bool = False

@@ -34,10 +34,26 @@ def _diversify(chunks: list[ScoredChunk], limit: int) -> list[ScoredChunk]:
     return kept
 
 
-def retrieve(question: str, top_k: int | None = None, min_score: float | None = None) -> RetrievalResult:
+def evidence_strength(best_score: float | None, min_score: float) -> str:
+    """Coarse, explainable label shown to users: how far above the gate the best match sits."""
+    if best_score is None or best_score < min_score:
+        return "none"
+    if best_score >= min_score + 0.06:
+        return "strong"
+    if best_score >= min_score + 0.02:
+        return "moderate"
+    return "weak"
+
+
+def retrieve(
+    question: str,
+    top_k: int | None = None,
+    min_score: float | None = None,
+    language: str = "en",
+) -> RetrievalResult:
     settings = get_settings()
     top_k = top_k or settings.retrieval_top_k
-    min_score = settings.retrieval_min_score if min_score is None else min_score
+    min_score = settings.gate_for_language(language) if min_score is None else min_score
 
     vector = get_embedder().embed_query(question)
     # Over-fetch so that per-source diversification still fills top_k.

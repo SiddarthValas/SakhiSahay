@@ -38,7 +38,20 @@ class Settings(BaseSettings):
     qdrant_collection: str = "sakhisahay_knowledge"
 
     retrieval_top_k: int = Field(default=6, ge=1, le=20)
-    retrieval_min_score: float = Field(default=0.80, ge=0.0, le=1.0)
+    # Cosine-similarity gates below which evidence is treated as insufficient.
+    # multilingual-e5 compresses scores into ~0.75-0.93 and cross-lingual queries
+    # score ~0.05 lower than English ones, hence per-language gates. Calibrated on
+    # evaluation/eval_questions.yaml (see docs/evaluation) - not a universal constant.
+    retrieval_min_score: float = Field(default=0.83, ge=0.0, le=1.0)
+    retrieval_min_score_hi: float = Field(default=0.78, ge=0.0, le=1.0)
+    retrieval_min_score_hinglish: float = Field(default=0.80, ge=0.0, le=1.0)
+
+    def gate_for_language(self, language: str) -> float:
+        if language == "hi":
+            return self.retrieval_min_score_hi
+        if language == "hinglish":
+            return self.retrieval_min_score_hinglish
+        return self.retrieval_min_score
 
     knowledge_dir: Path = BACKEND_DIR / "data" / "knowledge"
 

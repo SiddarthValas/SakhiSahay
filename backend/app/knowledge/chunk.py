@@ -53,16 +53,18 @@ def chunk_text(
     section: str | None = None
     buffer: list[str] = []
     buffer_section: str | None = None
+    carry: list[str] = []  # fragments too small to stand alone; prepended to the next chunk
 
     def flush() -> None:
-        nonlocal buffer
+        nonlocal buffer, carry
         if not buffer:
             return
-        body = "\n\n".join(buffer).strip()
-        if len(body) < min_chars and chunks and chunks[-1].section == buffer_section:
-            chunks[-1].text = f"{chunks[-1].text}\n\n{body}"
-        elif body:
+        body = "\n\n".join([*carry, *buffer]).strip()
+        if len(body) < min_chars:
+            carry = [*carry, *buffer]
+        else:
             chunks.append(Chunk(index=len(chunks), section=buffer_section, text=body))
+            carry = []
         buffer = []
 
     for paragraph in paragraphs_raw:
@@ -81,10 +83,16 @@ def chunk_text(
             if projected > max_chars and buffer:
                 overlap = buffer[-1]
                 flush()
-                if len(overlap) < max_chars // 2:
+                if len(overlap) < max_chars // 3:
                     buffer = [overlap]
             buffer.append(piece)
     flush()
+    if carry:
+        leftover = "\n\n".join(carry).strip()
+        if chunks:
+            chunks[-1].text = f"{chunks[-1].text}\n\n{leftover}"
+        elif leftover:
+            chunks.append(Chunk(index=0, section=buffer_section, text=leftover))
     for i, c in enumerate(chunks):
         c.index = i
     return chunks
