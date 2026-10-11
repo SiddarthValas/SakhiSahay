@@ -114,7 +114,9 @@ def _retrieval_only_text(language: Language, chunks: list[ScoredChunk]) -> str:
     for i, chunk in enumerate(chunks[:3], start=1):
         p = chunk.payload
         section = f" - {p.section}" if p.section else ""
-        parts.append(f"**{p.publisher}: {p.title}{section}** [S{i}]\n{_excerpt(p.text)}")
+        parts.append(f"**{p.publisher}: {p.title}{section}** [S{i}]")
+        parts.append("")
+        parts.append(f"> {_excerpt(p.text)}")
         parts.append("")
     return "\n".join(parts).strip()
 

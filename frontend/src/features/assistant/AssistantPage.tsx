@@ -51,7 +51,7 @@ export function AssistantPage() {
   const [turns, setTurns] = useState<Turn[]>([]);
   const [language, setLanguage] = useState<LanguageChoice>("auto");
   const [includeTracker, setIncludeTracker] = useState(false);
-  const [input, setInput] = useState(params.get("q") ?? "");
+  const [input, setInput] = useState("");
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const idRef = useRef(0);

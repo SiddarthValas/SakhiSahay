@@ -6,6 +6,7 @@ records never enter the vector database.
 
 from __future__ import annotations
 
+import atexit
 import logging
 import uuid
 from dataclasses import asdict, dataclass
@@ -56,6 +57,14 @@ class VectorStore:
             path.mkdir(parents=True, exist_ok=True)
             self.client = QdrantClient(path=str(path))
             self.mode = "embedded"
+        # Close explicitly at exit; the client's __del__ is noisy during interpreter shutdown.
+        atexit.register(self._close_quietly)
+
+    def _close_quietly(self) -> None:
+        try:
+            self.client.close()
+        except Exception:  # noqa: BLE001
+            pass
 
     # ---- lifecycle ---------------------------------------------------------
     def ensure_collection(self, dimension: int, recreate: bool = False) -> None:

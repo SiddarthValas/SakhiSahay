@@ -29,8 +29,8 @@ export function DoctorsPage() {
         description="A clearly labelled preview of how SakhiSahay will connect education and tracking to professional care. Nothing here is a real clinician or booking."
       />
 
-      <Notice tone="advisory" title="Demonstration only">
-        {data?.notice ?? "Sample profiles are fictional placeholders used to preview the experience."}
+      <Notice tone="advisory" title="Preview with fictional sample data">
+        {data?.notice?.replace(/^Demonstration only\.\s*/, "") ?? "Sample profiles are fictional placeholders used to preview the experience."}
       </Notice>
 
       <div className="mt-6 grid gap-4 md:grid-cols-3">

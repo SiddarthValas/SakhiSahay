@@ -84,15 +84,18 @@ def build_insights(
             variability = "have varied moderately"
         else:
             variability = "have varied noticeably"
+        if stats.shortest_cycle == stats.longest_cycle:
+            range_text = f"cycle length was {stats.shortest_cycle} days every time"
+        else:
+            range_text = (
+                f"cycle length ranged from {stats.shortest_cycle} to {stats.longest_cycle} days "
+                f"(median {stats.median_cycle_length:g})"
+            )
         insights.append(
             Insight(
                 kind="cycle_length",
                 title="Your recorded cycle lengths",
-                statement=(
-                    f"Across {stats.completed_cycles} completed cycles you logged, cycle length ranged from "
-                    f"{stats.shortest_cycle} to {stats.longest_cycle} days (median {stats.median_cycle_length:g}). "
-                    f"Your cycles {variability}."
-                ),
+                statement=f"Across {stats.completed_cycles} completed cycles you logged, {range_text}. Your cycles {variability}.",
                 basis=(
                     "Cycle length = days between consecutive logged period start dates: "
                     + ", ".join(str(n) for n in lengths)
@@ -134,14 +137,15 @@ def build_insights(
     # ---- period duration ----------------------------------------------------
     if stats.periods_with_duration >= MIN_PERIODS_FOR_DURATION:
         durations = [(p.end_date - p.start_date).days + 1 for p in periods if p.end_date]
+        if min(durations) == max(durations):
+            duration_text = f"bleeding lasted {min(durations)} days each time"
+        else:
+            duration_text = f"bleeding lasted {min(durations)} to {max(durations)} days (average {stats.average_period_duration:g})"
         insights.append(
             Insight(
                 kind="period_duration",
                 title="How long your periods lasted",
-                statement=(
-                    f"For the {stats.periods_with_duration} periods where you logged an end date, bleeding lasted "
-                    f"{min(durations)} to {max(durations)} days (average {stats.average_period_duration:g})."
-                ),
+                statement=f"For the {stats.periods_with_duration} periods where you logged an end date, {duration_text}.",
                 basis="Duration = end date - start date + 1 for each period with an end date: "
                 + ", ".join(str(d) for d in durations)
                 + ".",
@@ -189,7 +193,7 @@ def build_insights(
                 Insight(
                     kind="symptom_frequency",
                     title=f"{label} across your logged cycles",
-                    statement=f"{label} was recorded in {top_hits} of your last {len(recent_windows)} logged cycles.",
+                    statement=f"You logged {label.lower()} in {top_hits} of your last {len(recent_windows)} cycles.",
                     basis=(
                         "A cycle counts if at least one entry for this symptom falls between that cycle's period "
                         "start date and the next period start date."

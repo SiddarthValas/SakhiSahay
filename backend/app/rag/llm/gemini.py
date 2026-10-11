@@ -40,7 +40,9 @@ class GeminiProvider:
             response = self._client.models.generate_content(model=self.model, contents=user, config=config)
         except errors.APIError as exc:
             code = getattr(exc, "code", None)
-            if code in (401, 403):
+            message = str(exc)
+            # Gemini reports an invalid key as 400 INVALID_ARGUMENT ("API key not valid"), not 401.
+            if code in (401, 403) or "API key" in message or "API_KEY_INVALID" in message:
                 raise LLMUnavailable("The language-model API key was rejected. Check GEMINI_API_KEY.") from exc
             if code == 429:
                 raise LLMUnavailable("The language model is rate-limited right now. Please retry shortly.", retryable=True) from exc

@@ -130,6 +130,8 @@
   .prose-answer strong { @apply font-semibold text-plum-800; }
   .prose-answer h1, .prose-answer h2, .prose-answer h3 { @apply font-sans font-semibold text-ink-900 text-base mt-4 mb-2; }
   .prose-answer a { @apply text-plum-600 underline decoration-plum-300 underline-offset-2; }
+  .prose-answer blockquote { @apply mb-3 border-l-[3px] border-plum-200 pl-3.5 text-[0.93rem] text-ink-700 italic; }
+  .prose-answer blockquote p { @apply mb-0; }
 }
 
 @keyframes rise {

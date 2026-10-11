@@ -51,7 +51,7 @@ def test_cycle_length_statistics_are_exact():
     assert "cycle_length" in kinds and "period_duration" in kinds
     assert "guidance" not in kinds  # 28-day cycles do not trigger the NHS range note
     cycle = next(i for i in res.insights if i.kind == "cycle_length")
-    assert "28 to 28 days" in cycle.statement
+    assert "was 28 days every time" in cycle.statement
     assert "28, 28" in cycle.basis
 
 
@@ -75,7 +75,7 @@ def test_symptom_frequency_counts_cycles_not_entries():
     ]
     res = build_insights(periods, symptoms, today=TODAY)
     freq = next(i for i in res.insights if i.kind == "symptom_frequency")
-    assert freq.statement == "Cramps was recorded in 3 of your last 4 logged cycles."
+    assert freq.statement == "You logged cramps in 3 of your last 4 cycles."
 
 
 def test_recent_symptom_days_requires_three_distinct_days():
